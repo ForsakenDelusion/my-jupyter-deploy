@@ -95,7 +95,24 @@ docker compose down
       HTTP_PROXY: http://your-proxy-ip:port  # 可选
 ```
 
-### 2. 自定义 Python 依赖
+### 2. 网络代理配置 (Proxy)
+
+如果你的服务器位于内网或需要通过代理访问 GitHub/HuggingFace，**必须**配置网络代理，否则：
+1.  JupyterHub 启动时可能无法正确拉取课件。
+2.  用户在 Notebook 中使用 `pip install` 或 `git clone` 可能会超时失败。
+
+**配置方法**：
+在 `docker-compose.yml` 中取消注释并修改以下变量：
+
+```yaml
+    environment:
+      # ... 其他配置 ...
+      HTTP_PROXY: http://192.168.1.100:7890   # 替换为你的代理地址
+      HTTPS_PROXY: http://192.168.1.100:7890  # 替换为你的代理地址
+```
+*注意：这里的 IP 应该是宿主机的局域网 IP 或者代理服务器的 IP，尽量避免使用 `127.0.0.1` (除非你使用的是 host 网络模式)。*
+
+### 3. 自定义 Python 依赖
 
 如果需要为 Notebook 添加新的 Python 包：
 

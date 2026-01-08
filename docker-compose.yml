@@ -30,11 +30,12 @@ services:
       DOCKER_NOTEBOOK_IMAGE: my-custom-notebook-dev:latest
       # Notebook directory inside user image
       DOCKER_NOTEBOOK_DIR: /home/jovyan/work
-      # Git 同步脚本配置
-      REPO_URL: https://github.com/ForsakenDelusion/ai-proj.git
-      REPO_BRANCH: main
-      HTTP_PROXY: http://192.168.6.15:7890
-      HTTPS_PROXY: http://192.168.6.15:7890
+      # Git 同步脚本配置 (请在此处填入你的仓库地址)
+      # REPO_URL: https://github.com/your-org/your-repo.git
+      # REPO_BRANCH: main
+      # 代理配置 (如果服务器在内网，请取消注释并配置)
+      # HTTP_PROXY: http://proxy.example.com:7890
+      # HTTPS_PROXY: http://proxy.example.com:7890
 
 volumes:
   jupyterhub-data-dev:

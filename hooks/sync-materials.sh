@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 可通过环境变量覆盖的配置
-REPO_URL="${REPO_URL:-https://github.com/ForsakenDelusion/ai-proj.git}"
+REPO_URL="${REPO_URL:-}"
 REPO_BRANCH="${REPO_BRANCH:-main}"
 WORK_DIR="${DOCKER_NOTEBOOK_DIR:-/home/jovyan/work}"
 HTTP_PROXY=${HTTP_PROXY:-}
@@ -9,11 +9,16 @@ HTTPS_PROXY=${HTTPS_PROXY:-}
 [ -n "$HTTP_PROXY" ] && export http_proxy="$HTTP_PROXY"
 [ -n "$HTTPS_PROXY" ] && export https_proxy="$HTTPS_PROXY"
 
-REPO_URL=${REPO_URL:-https://github.com/ForsakenDelusion/ai-proj.git}
-REPO_BRANCH=${REPO_BRANCH:-main}
-WORK_DIR=${WORK_DIR:-/home/jovyan/work}
+# 移除重复赋值
+# REPO_URL=${REPO_URL:-...} 
 
 echo "=== 开始同步课件（超时 40s，失败不阻塞启动） ==="
+
+if [ -z "$REPO_URL" ]; then
+    echo "未配置 REPO_URL，跳过课件同步。"
+    exit 0
+fi
+
 if [ -d "$WORK_DIR" ]; then
   cd "$WORK_DIR"
   if [ ! -d ".git" ]; then
