@@ -74,6 +74,71 @@ docker compose down
 ### 3. 配置文件
 *   `jupyterhub_config.py`: 配置了 Native Authenticator，DockerSpawner 以及相应的环境变量透传。
 
+## 配置指南
+
+本环境支持高度定制，以下是常见配置项的修改方法。
+
+### 1. 基础参数与 Git 同步 (`docker-compose.yml`)
+
+在 `docker-compose.yml` 的 `environment` 部分，你可以修改以下变量：
+
+*   **`JUPYTERHUB_ADMIN`**: 设置默认管理员用户名（默认为 `admin`）。
+*   **`REPO_URL`**: 指定课件同步的 Git 仓库地址。
+*   **`REPO_BRANCH`**: 指定 Git 分支（默认为 `main`）。
+*   **`HTTP_PROXY` / `HTTPS_PROXY`**: 如果服务器处于内网，需要设置代理以便容器能拉取 Git 仓库或安装包。
+
+```yaml
+    environment:
+      JUPYTERHUB_ADMIN: admin
+      REPO_URL: https://github.com/YourUsername/your-course-repo.git
+      REPO_BRANCH: master
+      HTTP_PROXY: http://your-proxy-ip:port  # 可选
+```
+
+### 2. 自定义 Python 依赖
+
+如果需要为 Notebook 添加新的 Python 包：
+
+1.  修改 `requirements-base.txt` (基础包) 或 `requirements-ml.txt` (机器学习大包)。
+2.  重新构建 Notebook 镜像：
+
+```bash
+DOCKER_BUILDKIT=1 docker build -t my-custom-notebook-dev:latest -f Dockerfile.notebook .
+```
+
+3.  重启服务：`docker compose up -d`
+
+### 3. 系统级依赖 (APT)
+
+如果需要安装 `gcc`, `vim` 等系统工具：
+
+1.  编辑 `Dockerfile.notebook`。
+2.  在 `apt-get install` 区块添加包名。
+3.  重新构建镜像并重启。
+
+### 4. 资源限制 (CPU/内存)
+
+默认配置未限制单用户容器的资源。如需限制，请编辑 `jupyterhub_config.py`：
+
+```python
+# 限制每个用户的内存使用量
+c.DockerSpawner.mem_limit = '2G'
+
+# 限制 CPU 使用 (1.0 代表 1 个核心)
+c.DockerSpawner.cpu_limit = 1.0
+```
+
+修改后只需重启 Hub 容器：`docker compose restart hub`
+
+### 5. 端口映射
+
+默认开发环境映射到宿主机的 `8001` 端口。如需修改，编辑 `docker-compose.yml`：
+
+```yaml
+    ports:
+      - "8080:8000"  # 将 8001 改为你想要的端口
+```
+
 ## 常见问题
 
 **Q: 容器启动失败，报错 "unbound variable"**
