@@ -1,0 +1,44 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+
+services:
+  hub:
+    restart: always
+    image: myjupyterhub-dev:5.3.0
+    container_name: jupyterhub-dev  # 避免与 stable 冲突
+    networks:
+      - jupyterhub-network-dev
+    volumes:
+      # The JupyterHub configuration file
+      - "./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro"
+      # Bind Docker socket on the host so we can connect to the daemon from
+      # within the container
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      # Bind Docker volume on host for JupyterHub database and cookie secrets
+      - "jupyterhub-data-dev:/data"
+    ports:
+      - "8001:8000"                 # dev 使用 8001 映射容器 8000
+    environment:
+      # This username will be a JupyterHub admin
+      JUPYTERHUB_ADMIN: admin
+      # All containers will join this network
+      DOCKER_NETWORK_NAME: jupyterhub-network-dev
+      # JupyterHub will spawn this Notebook image for users
+      # ！！！notebook的镜像也换！！！
+      # DOCKER_NOTEBOOK_IMAGE: quay.io/jupyter/base-notebook:latest
+      DOCKER_NOTEBOOK_IMAGE: my-custom-notebook-dev:latest
+      # Notebook directory inside user image
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
+      # Git 同步脚本配置
+      REPO_URL: https://github.com/ForsakenDelusion/ai-proj.git
+      REPO_BRANCH: main
+      HTTP_PROXY: http://192.168.6.15:7890
+      HTTPS_PROXY: http://192.168.6.15:7890
+
+volumes:
+  jupyterhub-data-dev:
+
+networks:
+  jupyterhub-network-dev:
+    name: jupyterhub-network-dev

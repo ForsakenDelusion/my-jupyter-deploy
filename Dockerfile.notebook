@@ -1,0 +1,33 @@
+ARG NB_PYTHON_VER=3.11
+FROM jupyter/base-notebook:python-${NB_PYTHON_VER}
+
+USER root
+# --- 1. 设置系统中文环境 ---
+RUN apt-get update && \
+    apt-get install -y locales git && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen && \
+    rm -rf /var/lib/apt/lists/*
+
+# --- 2. 设置环境变量 ---
+ENV LANG=zh_CN.UTF-8 \
+    LC_ALL=zh_CN.UTF-8 \
+    LANGUAGE=zh_CN.UTF-8
+
+# --- 3. 安装 Python 依赖（拆分以便缓存，减少重建耗时） ---
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+COPY requirements-base.txt /tmp/requirements-base.txt
+COPY requirements-ml.txt /tmp/requirements-ml.txt
+# 先安装基础依赖，后安装大体积 ML 包，避免小改动时重下大包
+RUN pip install --no-cache-dir --index-url ${PIP_INDEX_URL} -r /tmp/requirements-base.txt && \
+    pip install --no-cache-dir --index-url ${PIP_INDEX_URL} -r /tmp/requirements-ml.txt
+
+# --- 4. 配置自动 Git 同步脚本（解耦到外部文件） ---
+COPY hooks/sync-materials.sh /usr/local/bin/before-notebook.d/sync-materials.sh
+RUN chmod +x /usr/local/bin/before-notebook.d/sync-materials.sh
+
+USER ${NB_UID}
+
+# --- 5. 删除旧的 COPY 指令 ---
+# 既然用了 Git 拉取，就不要在构建时 COPY 了，否则容易混淆
+# COPY --chown=${NB_UID}:${NB_GID} ./materials /home/jovyan/work/materials

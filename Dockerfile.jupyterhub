@@ -1,0 +1,17 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+# 这里我直接指定版本
+# ARG JUPYTERHUB_VERSION
+# FROM quay.io/jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
+FROM jupyterhub/jupyterhub:5.3.0
+
+
+# Install dockerspawner, nativeauthenticator
+# hadolint ignore=DL3013
+RUN python3 -m pip install --no-cache-dir \
+    dockerspawner \
+    jupyterhub-nativeauthenticator \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]
