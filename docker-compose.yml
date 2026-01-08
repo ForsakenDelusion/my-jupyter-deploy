@@ -33,7 +33,7 @@ services:
       # Git 同步脚本配置 (请在此处填入你的仓库地址)
       # REPO_URL: https://github.com/your-org/your-repo.git
       # REPO_BRANCH: main
-      # 代理配置 (如果服务器在内网，请取消注释并配置)
+      # 代理配置 
       # HTTP_PROXY: http://proxy.example.com:7890
       # HTTPS_PROXY: http://proxy.example.com:7890
 
